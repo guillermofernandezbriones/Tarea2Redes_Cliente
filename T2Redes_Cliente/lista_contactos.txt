@@ -1,0 +1,7 @@
+juan,123.45.67.8,6432
+pedro,987.65.43.2,2345
+pablo,435.23.12.5,6666
+persona,23.23.45.22,8888
+anibal,weco,nohomo
+buena,quizas,mejorno
+PERRO,VACA,PATO
