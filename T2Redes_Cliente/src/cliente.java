@@ -103,7 +103,10 @@ class request extends Thread
                     if((st.countTokens() >= 2) && st.nextToken().equals("GET")) 
                     {
                     	// Devuelve el archivo que se pidio en el request
-                    	retornaArchivo(st.nextToken());
+                    	String next = st.nextToken();
+                    	//System.out.println("-----------ESTOOOOOOOOO:" + next + "-----------------");
+                    	//retornaArchivo(st.nextToken());
+                    	retornaArchivo(next);
                     }
                     else 
                     {
@@ -112,11 +115,93 @@ class request extends Thread
                     	
                     	if((stp.countTokens() >= 2) && stp.nextToken().equals("POST"))
                     	{
+                    		String loQueSePidio = st.nextToken();
+                    		//System.out.println("-----------ESTOOOOOOOOO:" + loQueSePidio + "-----------------");
                     		// Aca deberiamos mandar los datos obtenidos a una funcion que retorne la pagina con la lista
-                        	
-                        	String nombre = "", ip = "", puerto = "", sigueLeyendo = "";
+                        	String nombre = "", ip = "", puerto = "", sigueLeyendo = "", mensaje = "";
                         	int veces = 0;
                         	
+                        	if(loQueSePidio == "/enviar_msj.html"){
+                        		// Caso en que es envio de mensaje
+                        		try{
+                        			// Se seguira leyendo la peticion hasta terminar de tomar el mensaje
+                        			while(true){
+                        				sigueLeyendo = in.readLine();
+                            			System.out.println(currentThread().toString() + " - " + "--" + sigueLeyendo + "-");
+                            			
+                            			if(sigueLeyendo.length() == 0)
+                            			{
+                            				// Linea por linea tomando los datos ingresados, segun lo dado por enctype="multipart/form-data" 
+                            				veces++;
+                            				
+                            				if(veces == 2)
+                            				{
+                            					mensaje = in.readLine();
+                            					System.out.println(currentThread().toString() + " - " + "--" + mensaje + "-");
+                            					break;
+                            				}
+                            			}
+                        			}
+                        			
+                        			/****** ESTO ES TAREA 2 ******/
+                        			// PIFIA ACA: SE QUEDA ESPERANDO Y NO HACE LO SIGUIENTE :/
+                        			// En esta funcion se envian los datos al servidor TCP
+                        			System.out.println("-----------ESTOOOOOOOOO:" + mensaje + "-----------------");
+                        			enviarMsjAServidorTCP(mensaje);
+                        		}
+                        		catch(Exception exc){
+                        			System.out.println(currentThread().toString() + " - " + "Error: " + exc.toString());
+                        		}
+                        	}
+                        	else{
+                        		// Caso en que es /agregar.html
+                        		try
+                            	{
+                            		// Se seguira leyendo la peticion hasta terminar de tomar los datos que se ingresaron
+                            		while(true)
+                            		{
+                            			sigueLeyendo = in.readLine();
+                            			System.out.println(currentThread().toString() + " - " + "--" + sigueLeyendo + "-");
+                            			
+                            			if(sigueLeyendo.length() == 0)
+                            			{
+                            				// Linea por linea tomando los datos ingresados, segun lo dado por enctype="multipart/form-data" 
+                            				
+                            				veces++;
+                            				
+                            				if(veces == 2)
+                            				{
+                            					nombre = in.readLine();
+                            					System.out.println(currentThread().toString() + " - " + "--" + nombre + "-");
+                            				}                        				
+                            				
+                            				else if(veces == 3)
+                            				{
+                            					ip = in.readLine();
+                            					System.out.println(currentThread().toString() + " - " + "--" + ip + "-");
+                            				}
+                            				
+                            				else if(veces == 4)
+                            				{
+                            					puerto = in.readLine();
+                            					System.out.println(currentThread().toString() + " - " + "--" + puerto + "-");
+                            					break;
+                            				}
+                            			}
+                            		}
+                            		
+                            		// Mandamos a guardar lo que se ha leido
+                            		guardarDatosArchivo(nombre, ip, puerto);
+                            		
+                            		// Aqui se envian los datos obtenidos a una funcion que los escribe en un .txt                        		
+                            		leerDatosArchivoYDevolver(out);
+                            	}
+                            	catch(Exception exc)
+                            	{
+                            		System.out.println(currentThread().toString() + " - " + "Error: " + exc.toString());
+                            	}
+                        	}
+                        	/*
                         	try
                         	{
                         		// Se seguira leyendo la peticion hasta terminar de tomar los datos que se ingresaron
@@ -161,7 +246,7 @@ class request extends Thread
                         	catch(Exception exc)
                         	{
                         		System.out.println(currentThread().toString() + " - " + "Error: " + exc.toString());
-                        	}
+                        	}*/
                         }
                     	else
                     	{
@@ -190,6 +275,22 @@ class request extends Thread
 		// leerDatosArchivoYDevolver();
 		
 		System.out.println(currentThread().toString() + " - " + "Fin de la ejecucion");
+	}
+	
+	void enviarMsjAServidorTCP(String mensaje){
+		try{
+			/***** ENVIO DE DATOS AL SERVIDOR TCP *****/
+			
+			Socket socketCliente = new Socket("localhost", 7777);
+			DataOutputStream outToServer = new DataOutputStream(socketCliente.getOutputStream());
+			outToServer.writeBytes(mensaje + '\n');
+			
+			/****************** FIN *******************/
+		}
+		catch(IOException ioe)
+		{
+			System.out.println(ioe.toString());
+		}
 	}
 	
 	void retornaArchivo(String strArchivo)
@@ -293,13 +394,13 @@ class request extends Thread
 			escritor.close();
 			
 			/***** ENVIO DE DATOS AL SERVIDOR TCP *****/
-			
+			/*
 			String datos = nombre + "," + ip + "," + puerto;
 			
 			Socket socketCliente = new Socket("localhost", 7777);
 			DataOutputStream outToServer = new DataOutputStream(socketCliente.getOutputStream());
 			outToServer.writeBytes(datos + '\n');
-			
+			*/
 			/****************** FIN *******************/
 		}
 		catch(IOException ioe)
