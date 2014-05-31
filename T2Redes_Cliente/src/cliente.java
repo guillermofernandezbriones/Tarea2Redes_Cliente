@@ -145,8 +145,12 @@ class request extends Thread
                         			
                         			/****** ESTO ES TAREA 2 ******/
                         			// PIFIA ACA: SE QUEDA ESPERANDO Y NO HACE LO SIGUIENTE :/
-                        			// En esta funcion se envian los datos al servidor TCP
+                        			// ESTE PRINT ES PA VERIFICAR SI ES QUE TOMA EL MENSAJE, EL CUAL YA FUE TOMADO
+                        			// PERO POR ALGUNA RAZÓN NO LLEGA ACÁ (O ESO CREO)
                         			System.out.println("-----------ESTOOOOOOOOO:" + mensaje + "-----------------");
+                        			
+                        			// En esta funcion se envian los datos al servidor TCP
+                        			// OBVIAMENTE TAMPOCO LLEGA ACÁ
                         			enviarMsjAServidorTCP(mensaje);
                         		}
                         		catch(Exception exc){
@@ -165,8 +169,7 @@ class request extends Thread
                             			
                             			if(sigueLeyendo.length() == 0)
                             			{
-                            				// Linea por linea tomando los datos ingresados, segun lo dado por enctype="multipart/form-data" 
-                            				
+                            				// Linea por linea tomando los datos ingresados, segun lo dado por enctype="multipart/form-data"                            				
                             				veces++;
                             				
                             				if(veces == 2)
@@ -201,52 +204,6 @@ class request extends Thread
                             		System.out.println(currentThread().toString() + " - " + "Error: " + exc.toString());
                             	}
                         	}
-                        	/*
-                        	try
-                        	{
-                        		// Se seguira leyendo la peticion hasta terminar de tomar los datos que se ingresaron
-                        		while(true)
-                        		{
-                        			sigueLeyendo = in.readLine();
-                        			System.out.println(currentThread().toString() + " - " + "--" + sigueLeyendo + "-");
-                        			
-                        			if(sigueLeyendo.length() == 0)
-                        			{
-                        				// Linea por linea tomando los datos ingresados, segun lo dado por enctype="multipart/form-data" 
-                        				
-                        				veces++;
-                        				
-                        				if(veces == 2)
-                        				{
-                        					nombre = in.readLine();
-                        					System.out.println(currentThread().toString() + " - " + "--" + nombre + "-");
-                        				}                        				
-                        				
-                        				else if(veces == 3)
-                        				{
-                        					ip = in.readLine();
-                        					System.out.println(currentThread().toString() + " - " + "--" + ip + "-");
-                        				}
-                        				
-                        				else if(veces == 4)
-                        				{
-                        					puerto = in.readLine();
-                        					System.out.println(currentThread().toString() + " - " + "--" + puerto + "-");
-                        					break;
-                        				}
-                        			}
-                        		}
-                        		
-                        		// Mandamos a guardar lo que se ha leido
-                        		guardarDatosArchivo(nombre, ip, puerto);
-                        		
-                        		// Aqui se envian los datos obtenidos a una funcion que los escribe en un .txt                        		
-                        		leerDatosArchivoYDevolver(out);
-                        	}
-                        	catch(Exception exc)
-                        	{
-                        		System.out.println(currentThread().toString() + " - " + "Error: " + exc.toString());
-                        	}*/
                         }
                     	else
                     	{
@@ -394,13 +351,16 @@ class request extends Thread
 			escritor.close();
 			
 			/***** ENVIO DE DATOS AL SERVIDOR TCP *****/
-			/*
+			// ESTA ES LA PRUEBA QUE HICE DONDE EL PELAO; ENCAPSULÉ LOS DATOS INGRESADOS EN EL FORMULARIO EN UN SÓLO STRING
+			// Y LUEGO SE LO ENVIÉ AL SERVIDOR TCP
+			// SI SE CAMBIA DE CONSOLA EN ECLIPSE, SE PUEDE VER QUE EL SERVIDOR AVISA QUE LE LLEGÓ ESE STRING
+			
 			String datos = nombre + "," + ip + "," + puerto;
 			
 			Socket socketCliente = new Socket("localhost", 7777);
 			DataOutputStream outToServer = new DataOutputStream(socketCliente.getOutputStream());
 			outToServer.writeBytes(datos + '\n');
-			*/
+			
 			/****************** FIN *******************/
 		}
 		catch(IOException ioe)
