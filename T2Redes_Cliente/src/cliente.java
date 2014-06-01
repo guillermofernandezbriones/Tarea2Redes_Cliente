@@ -5,6 +5,7 @@ import java.util.*;
 public class cliente
 {
 	int puerto = 6666;
+	boolean repetidor = true;
 	
 	// Inicio de ejecucion
 	public static void main(String [] array)	
@@ -23,11 +24,12 @@ public class cliente
 			System.out.println("MSJ: -Esperando conexion...-");
 			
 			// Loop infinito que queda en espera de conexiones que entren, a las que se les asocia un thread
-			while(true)
+			while(repetidor)
 			{
 				Socket entrante = servSock.accept();
 				request rqCliente = new request(entrante);
 				rqCliente.start();
+				//agregar if con el botón de parado del repetidor
 			}
 			
 		}
@@ -76,7 +78,7 @@ class request extends Thread
   			String cadLeida = "";
   			
   			// Flag
-			int i = 0, leiTodo = 0;
+			int i = 0; //int leiTodo = 0;
 	
 			// Lee una linea mientras no este vacia y su largo sea diferente de cero
 			do{			
@@ -120,7 +122,6 @@ class request extends Thread
                     		// Aca deberiamos mandar los datos obtenidos a una funcion que retorne la pagina con la lista
                         	String nombre = "", ip = "", puerto = "", sigueLeyendo = "", mensaje = "";
                         	int veces = 0;
-                        	
                         	if(loQueSePidio == "/enviar_msj.html"){
                         		// Caso en que es envio de mensaje
                         		try{
@@ -128,18 +129,17 @@ class request extends Thread
                         			while(true){
                         				sigueLeyendo = in.readLine();
                             			System.out.println(currentThread().toString() + " - " + "--" + sigueLeyendo + "-");
-                            			
                             			if(sigueLeyendo.length() == 0)
                             			{
                             				// Linea por linea tomando los datos ingresados, segun lo dado por enctype="multipart/form-data" 
                             				veces++;
-                            				
+                            				System.out.println(veces);
                             				if(veces == 2)
                             				{
                             					mensaje = in.readLine();
                             					System.out.println(currentThread().toString() + " - " + "--" + mensaje + "-");
                             					break;
-                            				}
+                            				}                            
                             			}
                         			}
                         			
@@ -148,10 +148,10 @@ class request extends Thread
                         			// ESTE PRINT ES PA VERIFICAR SI ES QUE TOMA EL MENSAJE, EL CUAL YA FUE TOMADO
                         			// PERO POR ALGUNA RAZÓN NO LLEGA ACÁ (O ESO CREO)
                         			System.out.println("-----------ESTOOOOOOOOO:" + mensaje + "-----------------");
-                        			
+                        			enviarMsjAServidorTCP(mensaje);
                         			// En esta funcion se envian los datos al servidor TCP
                         			// OBVIAMENTE TAMPOCO LLEGA ACÁ
-                        			enviarMsjAServidorTCP(mensaje);
+
                         		}
                         		catch(Exception exc){
                         			System.out.println(currentThread().toString() + " - " + "Error: " + exc.toString());
@@ -238,7 +238,7 @@ class request extends Thread
 		try{
 			/***** ENVIO DE DATOS AL SERVIDOR TCP *****/
 			
-			Socket socketCliente = new Socket("localhost", 7778);
+			Socket socketCliente = new Socket("localhost", 7777);
 			DataOutputStream outToServer = new DataOutputStream(socketCliente.getOutputStream());
 			outToServer.writeBytes(mensaje + '\n');
 			socketCliente.close();
