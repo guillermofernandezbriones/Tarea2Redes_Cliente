@@ -78,7 +78,7 @@ class request extends Thread
   			String cadLeida = "";
   			
   			// Flag
-			int i = 0; //int leiTodo = 0;
+			int i = 0, flag = 0;
 	
 			// Lee una linea mientras no este vacia y su largo sea diferente de cero
 			do{			
@@ -118,10 +118,11 @@ class request extends Thread
                     	if((stp.countTokens() >= 2) && stp.nextToken().equals("POST"))
                     	{
                     		String loQueSePidio = st.nextToken();
-                    		//System.out.println("-----------ESTOOOOOOOOO:" + loQueSePidio + "-----------------");
+                    		// System.out.println("-----------ESTOOOOOOOOO:" + loQueSePidio + "-----------------");
                     		// Aca deberiamos mandar los datos obtenidos a una funcion que retorne la pagina con la lista
                         	String nombre = "", ip = "", puerto = "", sigueLeyendo = "", mensaje = "";
                         	int veces = 0;
+                        	
                         	if(loQueSePidio == "/enviar_msj.html"){
                         		// Caso en que es envio de mensaje
                         		try{
@@ -129,17 +130,22 @@ class request extends Thread
                         			while(true){
                         				sigueLeyendo = in.readLine();
                             			System.out.println(currentThread().toString() + " - " + "--" + sigueLeyendo + "-");
+                            			
+                            			if(flag == 1)
+                            				break;
+                            			
                             			if(sigueLeyendo.length() == 0)
                             			{
                             				// Linea por linea tomando los datos ingresados, segun lo dado por enctype="multipart/form-data" 
                             				veces++;
-                            				System.out.println(veces);
+                            				// System.out.println(veces);
                             				if(veces == 2)
                             				{
                             					mensaje = in.readLine();
                             					System.out.println(currentThread().toString() + " - " + "--" + mensaje + "-");
-                            					break;
-                            				}                            
+                            					flag = 1;
+                            					//break;
+                            				}
                             			}
                         			}
                         			
@@ -147,8 +153,10 @@ class request extends Thread
                         			// PIFIA ACA: SE QUEDA ESPERANDO Y NO HACE LO SIGUIENTE :/
                         			// ESTE PRINT ES PA VERIFICAR SI ES QUE TOMA EL MENSAJE, EL CUAL YA FUE TOMADO
                         			// PERO POR ALGUNA RAZÓN NO LLEGA ACÁ (O ESO CREO)
+                        			
                         			System.out.println("-----------ESTOOOOOOOOO:" + mensaje + "-----------------");
                         			enviarMsjAServidorTCP(mensaje);
+                        			
                         			// En esta funcion se envian los datos al servidor TCP
                         			// OBVIAMENTE TAMPOCO LLEGA ACÁ
 
@@ -166,6 +174,9 @@ class request extends Thread
                             		{
                             			sigueLeyendo = in.readLine();
                             			System.out.println(currentThread().toString() + " - " + "--" + sigueLeyendo + "-");
+                            			
+                            			if(flag == 1)
+                            				break;
                             			
                             			if(sigueLeyendo.length() == 0)
                             			{
@@ -188,7 +199,8 @@ class request extends Thread
                             				{
                             					puerto = in.readLine();
                             					System.out.println(currentThread().toString() + " - " + "--" + puerto + "-");
-                            					break;
+                            					flag = 1;
+                            					//break;
                             				}
                             			}
                             		}
@@ -213,23 +225,21 @@ class request extends Thread
                     }
 				}
 				
-				if(cadLeida == null)
+				if(flag == 1)
 				{
-					//leiTodo = 1;
 					break;
-					// Falta matar el thread
-					//currentThread().interrupt();
 				}
 			}
 			while (cadLeida != null && cadLeida.length() != 0);
+			
+			in.close();
+			out.close();
+			scliente.close();
 		}
 		catch(Exception e)
 		{
 			System.out.println(currentThread().toString() + " - " + "Error en servidor: " + e.toString());
 		}
-		
-		// Aqui se envian los datos obtenidos a una funcion que los escribe en un .txt
-		// leerDatosArchivoYDevolver();
 		
 		System.out.println(currentThread().toString() + " - " + "Fin de la ejecucion");
 	}
