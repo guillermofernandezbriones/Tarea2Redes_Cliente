@@ -238,15 +238,17 @@ class request extends Thread
 		try{
 			/***** ENVIO DE DATOS AL SERVIDOR TCP *****/
 			
-			Socket socketCliente = new Socket("localhost", 7777);
+			Socket socketCliente = new Socket("localhost", 7778);
 			DataOutputStream outToServer = new DataOutputStream(socketCliente.getOutputStream());
 			outToServer.writeBytes(mensaje + '\n');
+			socketCliente.close();
 			
 			/****************** FIN *******************/
 		}
 		catch(IOException ioe)
 		{
 			System.out.println(ioe.toString());
+			
 		}
 	}
 	
@@ -344,9 +346,21 @@ class request extends Thread
 			BufferedWriter escritor = new BufferedWriter(new FileWriter(listaContactos, true));
 			
 			// Escribo en el archivo nuevo dado el siguiente formato
+			if(( nombre == null) || (nombre.isEmpty())){
+			nombre =" ";
+			System.out.println("campo nombre vacio");
+			}
+			if(( ip == null) || (ip.isEmpty())){
+			ip = "  ";
+			System.out.println("campo ip vacio");
+			}
+			if(( puerto == null) || (puerto.isEmpty())){
+			puerto = " ";
+			System.out.println("campo ip vacio");
+			}
 			escritor.write(nombre + "," + ip + "," + puerto);
 			escritor.newLine();
-			
+				
 			// Cierro escritor
 			escritor.close();
 			
@@ -360,6 +374,7 @@ class request extends Thread
 			Socket socketCliente = new Socket("localhost", 7777);
 			DataOutputStream outToServer = new DataOutputStream(socketCliente.getOutputStream());
 			outToServer.writeBytes(datos + '\n');
+			socketCliente.close();
 			
 			/****************** FIN *******************/
 		}
@@ -420,6 +435,7 @@ class request extends Thread
 		}
 		catch(IOException ioexc)
 		{
+			System.out.println(ioexc.toString());
 			System.out.println(ioexc.toString());
 		}
 	}

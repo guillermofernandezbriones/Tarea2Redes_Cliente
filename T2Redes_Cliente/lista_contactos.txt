@@ -1,11 +1,5 @@
-juan,123.45.67.8,6432
-pedro,987.65.43.2,2345
-pablo,435.23.12.5,6666
-persona,23.23.45.22,8888
-anibal,weco,nohomo
-buena,quizas,mejorno
-PERRO,VACA,PATO
-pablo,202.3.3.4,6678
-nacho,34.23.14.5,2299
-alicia,200.33.22.4,9990
-lala,797.4.4.3,5555
+asd,asd,asd
+prueba1,prueba1, 
+prueba2,  ,prueba2
+ ,prueba3,prueba3
+asdasd,asd,asd
