@@ -118,12 +118,11 @@ class request extends Thread
                     	if((stp.countTokens() >= 2) && stp.nextToken().equals("POST"))
                     	{
                     		String loQueSePidio = st.nextToken();
-                    		// System.out.println("-----------ESTOOOOOOOOO:" + loQueSePidio + "-----------------");
                     		// Aca deberiamos mandar los datos obtenidos a una funcion que retorne la pagina con la lista
                         	String nombre = "", ip = "", puerto = "", sigueLeyendo = "", mensaje = "";
                         	int veces = 0;
                         	
-                        	if(loQueSePidio == "/enviar_msj.html"){
+                        	if(loQueSePidio.equals("/enviar_msj.html")){
                         		// Caso en que es envio de mensaje
                         		try{
                         			// Se seguira leyendo la peticion hasta terminar de tomar el mensaje
@@ -150,16 +149,11 @@ class request extends Thread
                         			}
                         			
                         			/****** ESTO ES TAREA 2 ******/
-                        			// PIFIA ACA: SE QUEDA ESPERANDO Y NO HACE LO SIGUIENTE :/
-                        			// ESTE PRINT ES PA VERIFICAR SI ES QUE TOMA EL MENSAJE, EL CUAL YA FUE TOMADO
-                        			// PERO POR ALGUNA RAZÓN NO LLEGA ACÁ (O ESO CREO)
                         			
-                        			System.out.println("-----------ESTOOOOOOOOO:" + mensaje + "-----------------");
+                        			// Aca se envian los datos al servidor TCP
                         			enviarMsjAServidorTCP(mensaje);
                         			
-                        			// En esta funcion se envian los datos al servidor TCP
-                        			// OBVIAMENTE TAMPOCO LLEGA ACÁ
-
+                        			/*****************************/
                         		}
                         		catch(Exception exc){
                         			System.out.println(currentThread().toString() + " - " + "Error: " + exc.toString());
@@ -248,9 +242,17 @@ class request extends Thread
 		try{
 			/***** ENVIO DE DATOS AL SERVIDOR TCP *****/
 			
+			// Socket que envía hacia el servidor TCP que está escuchando en el puerto 7777
+			// y es "localhost" porque está en el mismo computador
 			Socket socketCliente = new Socket("localhost", 7777);
+			
+			// Aca se captura el flujo de datos HACIA el servidor
 			DataOutputStream outToServer = new DataOutputStream(socketCliente.getOutputStream());
+			
+			// Escribimos los datos en el flujo para su envio
 			outToServer.writeBytes(mensaje + '\n');
+			
+			// Se cierra el socket de cliente creado
 			socketCliente.close();
 			
 			/****************** FIN *******************/
