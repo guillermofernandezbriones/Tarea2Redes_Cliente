@@ -106,7 +106,7 @@ class request extends Thread
                     {
                     	// Devuelve el archivo que se pidio en el request
                     	String next = st.nextToken();
-                    	//System.out.println("-----------ESTOOOOOOOOO:" + next + "-----------------");
+                    	//System.out.println(next);
                     	//retornaArchivo(st.nextToken());
                     	retornaArchivo(next);
                     }
@@ -119,7 +119,7 @@ class request extends Thread
                     	{
                     		String loQueSePidio = st.nextToken();
                     		// Aca deberiamos mandar los datos obtenidos a una funcion que retorne la pagina con la lista
-                        	String nombre = "", ip = "", puerto = "", sigueLeyendo = "", mensaje = "";
+                        	String nombre = "", ip = "", puerto = "", sigueLeyendo = "", mensaje = "", nick = "";
                         	int veces = 0;
                         	
                         	if(loQueSePidio.equals("/enviar_msj.html")){
@@ -156,7 +156,42 @@ class request extends Thread
                         			/*****************************/
                         		}
                         		catch(Exception exc){
-                        			System.out.println(currentThread().toString() + " - " + "Error: " + exc.toString());
+                        			System.out.println(currentThread().toString() + " - " + "Error (en enviar_msj): " + exc.toString());
+                        		}
+                        	}
+                        	else if(loQueSePidio.equals("/recibir_msjs.html")){
+                        		// Aca se llega cuando el usuario quiere ver sus mensajes e ingreso su nick
+                        		// Entonces en este código agarramos su nick para comparar con los mensajes
+                        		// que están en el servidor TCP
+                        		try{
+                        			while(true){
+                        				sigueLeyendo = in.readLine();
+                            			System.out.println(currentThread().toString() + " - " + "--" + sigueLeyendo + "-");
+                            			
+                            			if(flag == 1)
+                            				break;
+                            			
+                            			if(sigueLeyendo.length() == 0)
+                            			{
+                            				// Linea por linea tomando los datos ingresados, segun lo dado por enctype="multipart/form-data" 
+                            				veces++;
+                            				// System.out.println(veces);
+                            				if(veces == 2)
+                            				{
+                            					nick = in.readLine();
+                            					System.out.println(currentThread().toString() + " - " + "--" + nick + "-");
+                            					flag = 1;
+                            					//break;
+                            				}
+                            			}
+                        			}
+                        			
+                        			// En esta parte se envia el nick a una funcion que rellena la pagina de mensajes recibidos
+                        			// Con los mensajes que son para el nick especificado
+                        			recibirMisMensajes(nick);
+                        		}
+                        		catch(Exception exc){
+                        			System.out.println(currentThread().toString() + " - " + "Error (en recibir_msjs): " + exc.toString());
                         		}
                         	}
                         	else{
@@ -256,11 +291,60 @@ class request extends Thread
 			socketCliente.close();
 			
 			/****************** FIN *******************/
+			
+			// Se retorna la pagina "agregar.html"
+			retornaArchivo("/agregar.html");
 		}
 		catch(IOException ioe)
 		{
 			System.out.println(ioe.toString());
 			
+		}
+	}
+	
+	void recibirMisMensajes(String nick){
+		// En esta funcion se hace conexion con el servidor para escanear el archivo de mensajes y ver los que le corresponden al nick
+		// Se manda una solicitud al servidor, el servidor la procesa y debe enviar de vuelta
+		
+		String recibidoDesdeServidor= "";
+		
+		try{
+			// Socket que envía hacia el servidor TCP que está escuchando en el puerto 7777
+			// y es "localhost" porque está en el mismo computador
+			Socket socketCliente = new Socket("localhost", 7777);
+			
+			// Aca se captura el flujo de datos HACIA el servidor
+			DataOutputStream outToServer = new DataOutputStream(socketCliente.getOutputStream());
+			
+			// Escribimos los datos en el flujo para su envio
+			outToServer.writeBytes("USER " + nick + '\n');
+			
+			// Aca se captura el flujo DESDE el servidor
+			BufferedReader desdeServidorTCP = new BufferedReader(new InputStreamReader(socketCliente.getInputStream()));
+			
+			// Se guarda en recibidoDesdeServidor lo que llego desde el servidor TCP
+			// recibidoDesdeServidor = desdeServidorTCP.readLine();
+			
+			// CON ESTE CODIGO DEBERIA RECIBIR TODO EL STRING "MENSAJE" QUE LE ENVIA EL SERVIDOR TCP
+			// PERO POR ALGUNA RAZON SE QUEDA LOOPEANDO
+			// HAY QUE VER UNA MANERA CON LA QUE NO LOOPEE AL LEER LA RESPUESTA
+			
+			/*StringBuilder builder = new StringBuilder();
+			String aux = "";
+
+			while ((aux = desdeServidorTCP.readLine()) != null){
+			    builder.append(aux);
+			}
+
+			recibidoDesdeServidor = builder.toString();*/
+			
+			// System.out.println(recibidoDesdeServidor);
+			
+			// Se cierra el socket de cliente creado
+			socketCliente.close();
+		}
+		catch(IOException ioe){
+			System.out.println(ioe.toString());
 		}
 	}
 	
