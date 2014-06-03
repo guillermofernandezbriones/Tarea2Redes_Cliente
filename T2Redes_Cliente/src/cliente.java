@@ -119,7 +119,7 @@ class request extends Thread
                     	{
                     		String loQueSePidio = st.nextToken();
                     		// Aca deberiamos mandar los datos obtenidos a una funcion que retorne la pagina con la lista
-                        	String nombre = "", ip = "", puerto = "", sigueLeyendo = "", mensaje = "", nick = "";
+                        	String nombre = "", ip = "", puerto = "", sigueLeyendo = "", mensaje = "", nick = "", de = "", para = "";
                         	int veces = 0;
                         	
                         	if(loQueSePidio.equals("/enviar_msj.html")){
@@ -140,10 +140,19 @@ class request extends Thread
                             				// System.out.println(veces);
                             				if(veces == 2)
                             				{
+                            					de = in.readLine();
+                            					System.out.println(currentThread().toString() + " - " + "--" + de + "-");
+                            				}
+                            				else if(veces == 3)
+                            				{
+                            					para = in.readLine();
+                            					System.out.println(currentThread().toString() + " - " + "--" + para + "-");
+                            				}
+                            				else if(veces == 4)
+                            				{
                             					mensaje = in.readLine();
                             					System.out.println(currentThread().toString() + " - " + "--" + mensaje + "-");
                             					flag = 1;
-                            					//break;
                             				}
                             			}
                         			}
@@ -151,7 +160,7 @@ class request extends Thread
                         			/****** ESTO ES TAREA 2 ******/
                         			
                         			// Aca se envian los datos al servidor TCP
-                        			enviarMsjAServidorTCP(mensaje);
+                        			enviarMsjAServidorTCP(de, para, mensaje);
                         			
                         			/*****************************/
                         		}
@@ -188,7 +197,7 @@ class request extends Thread
                         			
                         			// En esta parte se envia el nick a una funcion que rellena la pagina de mensajes recibidos
                         			// Con los mensajes que son para el nick especificado
-                        			recibirMisMensajes(nick);
+                        			recibirMisMensajes(nick, out);
                         		}
                         		catch(Exception exc){
                         			System.out.println(currentThread().toString() + " - " + "Error (en recibir_msjs): " + exc.toString());
@@ -273,7 +282,7 @@ class request extends Thread
 		System.out.println(currentThread().toString() + " - " + "Fin de la ejecucion");
 	}
 	
-	void enviarMsjAServidorTCP(String mensaje){
+	void enviarMsjAServidorTCP(String de, String para, String mensaje){
 		try{
 			/***** ENVIO DE DATOS AL SERVIDOR TCP *****/
 			
@@ -285,7 +294,7 @@ class request extends Thread
 			DataOutputStream outToServer = new DataOutputStream(socketCliente.getOutputStream());
 			
 			// Escribimos los datos en el flujo para su envio
-			outToServer.writeBytes(mensaje + '\n');
+			outToServer.writeBytes("PARA," + para + ",De: " + de + " | Mensaje: " + mensaje + '\n');
 			
 			// Se cierra el socket de cliente creado
 			socketCliente.close();
@@ -302,11 +311,11 @@ class request extends Thread
 		}
 	}
 	
-	void recibirMisMensajes(String nick){
+	void recibirMisMensajes(String nick, PrintWriter out){
 		// En esta funcion se hace conexion con el servidor para escanear el archivo de mensajes y ver los que le corresponden al nick
 		// Se manda una solicitud al servidor, el servidor la procesa y debe enviar de vuelta
 		
-		String recibidoDesdeServidor= "";
+		String recibidoDesdeServidor = "", mensaje = "";
 		
 		try{
 			// Socket que envía hacia el servidor TCP que está escuchando en el puerto 7777
@@ -323,22 +332,26 @@ class request extends Thread
 			BufferedReader desdeServidorTCP = new BufferedReader(new InputStreamReader(socketCliente.getInputStream()));
 			
 			// Se guarda en recibidoDesdeServidor lo que llego desde el servidor TCP
-			// recibidoDesdeServidor = desdeServidorTCP.readLine();
+			recibidoDesdeServidor = desdeServidorTCP.readLine();
 			
-			// CON ESTE CODIGO DEBERIA RECIBIR TODO EL STRING "MENSAJE" QUE LE ENVIA EL SERVIDOR TCP
-			// PERO POR ALGUNA RAZON SE QUEDA LOOPEANDO
-			// HAY QUE VER UNA MANERA CON LA QUE NO LOOPEE AL LEER LA RESPUESTA
-			
-			/*StringBuilder builder = new StringBuilder();
-			String aux = "";
-
-			while ((aux = desdeServidorTCP.readLine()) != null){
-			    builder.append(aux);
+			// Desde aqui se crea el codigo HTML que tiene los mensajes para el usuario
+			out.println("HTTP/1.1 200 OK");
+		    out.println("Content-Type: text/html");
+		    out.println("\r\n");
+		    out.println("<html><head><title>AVIONCITO DE PAPEL</title><style>body{font-family: Tahoma, Geneva, sans-serif;}</style></head><body><h1><center>MENSAJES DE: " + nick + "</center></h1><fieldset>");
+		    out.println("<center><table>");
+		    out.println("<tr><th> MENSAJES </th></tr>");
+							
+			StringTokenizer strtok = new StringTokenizer(recibidoDesdeServidor,"--");
+			while(strtok.hasMoreTokens())
+			{
+				mensaje = strtok.nextToken();
+				
+				// Seguimos imprimiendo la pagina
+				out.println("<tr><td>" + mensaje + "</td></tr>");
 			}
-
-			recibidoDesdeServidor = builder.toString();*/
 			
-			// System.out.println(recibidoDesdeServidor);
+		    out.println("</table></center></fieldset></body></html>");
 			
 			// Se cierra el socket de cliente creado
 			socketCliente.close();
@@ -465,12 +478,14 @@ class request extends Thread
 			// Y LUEGO SE LO ENVIÉ AL SERVIDOR TCP
 			// SI SE CAMBIA DE CONSOLA EN ECLIPSE, SE PUEDE VER QUE EL SERVIDOR AVISA QUE LE LLEGÓ ESE STRING
 			
+			/*
 			String datos = nombre + "," + ip + "," + puerto;
 			
 			Socket socketCliente = new Socket("localhost", 7777);
 			DataOutputStream outToServer = new DataOutputStream(socketCliente.getOutputStream());
 			outToServer.writeBytes(datos + '\n');
 			socketCliente.close();
+			*/
 			
 			/****************** FIN *******************/
 		}
